@@ -1,56 +1,108 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Organizador de Estudos com IA</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>StudyAI — Plano de Estudos com IA</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 </head>
 <body>
-  <!-- Header -->
   <header class="header">
-    <div class="logo">📘 StudyAI</div>
+    <div class="brand">📘 StudyAI</div>
     <nav class="nav">
-      <a href="#about">Sobre</a>
-      <a href="#plan">Gerar Plano</a>
-      <a href="#contact">Contato</a>
+      <a href="#features">Recursos</a>
+      <a href="#planner">Gerar Plano</a>
+      <a href="#faq">FAQ</a>
     </nav>
-    <a href="#plan" class="btn">Começar</a>
+    <a href="#planner" class="btn btn-primary">Começar</a>
   </header>
 
-  <!-- Hero Section -->
   <section class="hero">
-    <div class="hero-text">
-      <h1>Organize seus estudos com Inteligência Artificial</h1>
-      <p>Deixe a IA criar o melhor plano de estudo para você, com base em suas matérias, tempo e objetivos.</p>
-      <a href="#plan" class="btn primary">Gerar meu Plano</a>
+    <div class="hero-copy">
+      <h1>Seu plano de estudos, turbo por IA.</h1>
+      <p>Conte suas matérias, tempo e objetivo. A IA cria um roteiro semanal com sessões, pausas e revisões — sob medida para você.</p>
+      <div class="hero-cta">
+        <a href="#planner" class="btn btn-primary">Gerar meu plano</a>
+        <a href="#features" class="btn btn-ghost">Ver recursos</a>
+      </div>
     </div>
-    <div class="hero-img">
-      <img src="https://picsum.photos/500/500" alt="Estudante">
+    <div class="hero-art">
+      <div class="orb orb-1"></div>
+      <div class="orb orb-2"></div>
+      <div class="orb orb-3"></div>
     </div>
   </section>
 
-  <!-- Form Section -->
-  <section id="plan" class="form-section">
-    <h2>Crie seu plano de estudo</h2>
+  <section id="features" class="features">
+    <div class="feat">
+      <h3>🎯 Foco inteligente</h3>
+      <p>Prioriza matérias-chave e distribui o tempo otimamente.</p>
+    </div>
+    <div class="feat">
+      <h3>⏱️ Pausas eficazes</h3>
+      <p>Propõe ciclos de estudo e descanso no ritmo certo.</p>
+    </div>
+    <div class="feat">
+      <h3>🗓️ Semana organizada</h3>
+      <p>Plano em cards por dia, pronto para executar.</p>
+    </div>
+  </section>
+
+  <section id="planner" class="planner">
+    <h2>Gerar plano com IA</h2>
     <form id="study-form">
-      <label>Matérias (separe por vírgula):</label>
-      <input type="text" id="subjects" placeholder="Ex: Matemática, Física, História" required>
+      <div class="field">
+        <label>Matérias (separe por vírgula)</label>
+        <input id="subjects" type="text" placeholder="Ex: Matemática, Física, História" required />
+      </div>
+      <div class="grid-2">
+        <div class="field">
+          <label>Tempo por dia (horas)</label>
+          <input id="hours" type="number" min="1" max="24" value="3" required />
+        </div>
+        <div class="field">
+          <label>Nível</label>
+          <select id="level">
+            <option>iniciante</option>
+            <option>intermediário</option>
+            <option>avançado</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label>Objetivo</label>
+        <input id="goal" type="text" placeholder="Ex: prova de matemática, ENEM, revisar 2º bimestre" required />
+      </div>
 
-      <label>Tempo disponível por dia (em horas):</label>
-      <input type="number" id="time" min="1" max="24" required>
+      <details class="field adv">
+        <summary>Avançado (opcional): usar minha própria API Key</summary>
+        <input id="user-api" type="password" placeholder="Cole aqui sua OpenAI API Key (opcional)" />
+        <small>Se vazio, o site usa a chave embutida (menos seguro). Para mais segurança, cole a sua aqui.</small>
+      </details>
 
-      <label>Objetivo principal:</label>
-      <input type="text" id="goal" placeholder="Ex: passar no vestibular" required>
-
-      <button type="submit" class="btn primary">Gerar Plano com IA</button>
+      <button class="btn btn-primary" type="submit">Gerar plano com IA</button>
+      <div id="status" class="status"></div>
     </form>
 
-    <div id="plan-result" class="result-box"></div>
+    <div id="cards" class="cards"></div>
   </section>
 
-  <footer id="contact" class="footer">
-    <p>© 2025 StudyAI. Criado para ajudar estudantes.</p>
+  <section id="faq" class="faq">
+    <h2>Perguntas frequentes</h2>
+    <details>
+      <summary>Como a IA decide a ordem das matérias?</summary>
+      <p>O prompt pede priorização baseada em objetivo, nível e tempo diário, além de pausas e revisões espaçadas.</p>
+    </details>
+    <details>
+      <summary>Posso instalar como app?</summary>
+      <p>Sim, hospede e use “Adicionar à tela inicial”.</p>
+    </details>
+  </section>
+
+  <footer class="footer">
+    <span>© 2025 StudyAI — feito para estudantes</span>
   </footer>
 
   <script src="script.js"></script>
