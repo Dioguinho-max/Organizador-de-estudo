@@ -1,6 +1,6 @@
 // ==== CONFIGURAÇÃO ====
 // ⚠️ Esta chave está embutida no front-end (menos seguro). Você assumiu o risco.
-const EMBEDDED_API_KEY = "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";
+const EMBEDDED_API_KEY = "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";
 
 // ==== DOM ====
 const form = document.getElementById("study-form");
