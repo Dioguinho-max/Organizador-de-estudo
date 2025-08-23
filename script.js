@@ -123,11 +123,14 @@ function renderFallback({subjects, hours, goal}){
 }
 
 function escapeHtml(s){
-  return String(s).replace(/[&<>"']/g, (m)=>({
-    "&":"&amp;",
-    "<":"&lt;",
-    ">":"&gt;",
-    "\"":"&quot;",
-    "'":"&#039;"
-  }[m]));
+  return String(s).replace(/[&<>"']/g, function(m){
+    switch(m){
+      case "&": return "&amp;";
+      case "<": return "&lt;";
+      case ">": return "&gt;";
+      case "\"": return "&quot;";
+      case "'": return "&#039;";
+      default: return m;
+    }
+  });
 }
