@@ -1,14 +1,14 @@
-* { box-sizing: border-box; }
 :root{
   --bg: #0b0f17;
   --panel: #111826;
   --muted: #9aa4b2;
   --text: #e6edf3;
-  --primary: #7c5cff; /* violeta vibrante */
-  --accent: #00e0ff;  /* ciano vibrante */
+  --primary: #7c5cff;
+  --accent: #00e0ff;
   --card: #0f1522;
   --ring: rgba(124,92,255,0.35);
 }
+* { box-sizing: border-box; }
 html, body { height: 100%; }
 body{
   margin:0;

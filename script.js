@@ -1,6 +1,6 @@
 // ==== CONFIGURAÇÃO ====
-// Chave embutida (menos seguro). Você pode substituir por outra.
-const EMBEDDED_API_KEY = "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";
+// ⚠️ Esta chave está embutida no front-end (menos seguro). Você assumiu o risco.
+const EMBEDDED_API_KEY = "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";
 
 // ==== DOM ====
 const form = document.getElementById("study-form");
@@ -11,62 +11,79 @@ form.addEventListener("submit", async (e)=>{
   e.preventDefault();
   cardsEl.innerHTML = "";
   statusEl.textContent = "Gerando plano com IA...";
-  const subjects = document.getElementById("subjects").value;
+
+  const subjects = document.getElementById("subjects").value.trim();
   const hours = parseInt(document.getElementById("hours").value, 10);
-  const goal = document.getElementById("goal").value;
+  const goal = document.getElementById("goal").value.trim();
   const level = document.getElementById("level").value;
-  const userApi = document.getElementById("user-api").value.trim();
+  const userApi = (document.getElementById("user-api")?.value || "").trim();
   const apiKey = userApi || EMBEDDED_API_KEY;
 
+  if(!subjects || !hours || !goal){
+    statusEl.textContent = "Preencha todos os campos.";
+    return;
+  }
+
   try{
-    const plan = await generatePlanWithOpenAI({subjects, hours, goal, level, apiKey});
-    renderPlan(plan);
+    const content = await generateRichPlan({subjects, hours, goal, level, apiKey});
+    renderRichText(content);
     statusEl.textContent = "Plano gerado ✅";
   }catch(err){
     console.error(err);
-    statusEl.textContent = "Erro ao gerar plano. Mostrando uma sugestão básica.";
+    statusEl.textContent = "Erro ao gerar o plano. Mostrando sugestão básica.";
     renderFallback({subjects, hours, goal});
   }
 });
 
-async function generatePlanWithOpenAI({subjects, hours, goal, level, apiKey}){
-  const prompt = `Atue como um tutor de estudos. Gere um PLANO SEMANAL detalhado em JSON, seguindo ESTRITAMENTE este schema:
-{
-  "weekSummary": "resumo breve em português",
-  "days": [
-    {
-      "day": "Segunda-feira",
-      "blocks": [
-        {"subject":"Matéria", "minutes":0, "activity":"atividade objetiva", "notes":"dica curta"}
-      ]
-    }
-  ],
-  "tips": ["dica curta 1", "dica curta 2"]
-}
-Contexto do estudante:
+async function generateRichPlan({subjects, hours, goal, level, apiKey}){
+  const system = "Você é um tutor especialista em organização de estudos. Gere respostas claras, úteis e motivadoras.";
+  const user = `Crie um PLANO DE ESTUDOS DETALHADO em português do Brasil, organizado em seções e com linguagem simples.
+
+Dados do estudante:
 - Matérias: ${subjects}
 - Tempo disponível por dia: ${hours} horas
 - Nível: ${level}
 - Objetivo: ${goal}
 
+Formato da resposta (TEXTO, não JSON):
+📌 Resumo Geral
+- 2 a 4 bullets sobre a estratégia da semana (prioridades, distribuição do tempo, foco)
+
+📅 Plano Diário (7 dias)
+- Segunda-feira: liste blocos de estudo com duração aproximada (ex.: 50min + 10min pausa), atividades (exercícios, revisão ativa, flashcards) e metas
+- Terça-feira: ...
+- Quarta-feira: ...
+- Quinta-feira: ...
+- Sexta-feira: ...
+- Sábado: ...
+- Domingo: (permitido descanso e revisão leve)
+
+💡 Dicas Extras
+- Técnicas específicas (spaced repetition, active recall, Pomodoro, blurting, Feynman)
+- Rotina de revisão semanal
+- Como adaptar o plano se sobrar/ faltar tempo
+
 Regras:
-- Converta horas em minutos (ex.: 3h = 180 minutos) e distribua entre 3–5 blocos por dia.
-- Inclua pausas curtas entre blocos quando fizer sentido.
-- Priorize matérias-chave primeiro.
-- Use português do Brasil.
-- NÃO inclua texto fora do JSON.`;
+- Converta horas em blocos práticos (ex.: ${hours}h ≈ 3–4 blocos de ~45–50min + pausas)
+- Comece pelos tópicos mais importantes/difíceis
+- Inclua pausas entre blocos
+- Evite respostas genéricas; seja específico para as matérias enviadas
+`;
 
   const body = {
     model: "gpt-4o-mini",
-    messages: [{role:"user", content: prompt}],
-    temperature: 0.6,
-    max_tokens: 900
+    messages: [
+      { role: "system", content: system },
+      { role: "user", content: user }
+    ],
+    temperature: 0.7,
+    max_tokens: 1100
   };
 
   const resp = await fetch("https://api.openai.com/v1/chat/completions", {
-    method:"POST",
-    headers:{
-      "Content-Type":"application/json",
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
       "Authorization": `Bearer ${apiKey}`
     },
     body: JSON.stringify(body)
@@ -74,58 +91,24 @@ Regras:
 
   if(!resp.ok){
     const t = await resp.text();
-    throw new Error("OpenAI error: "+t);
+    throw new Error("OpenAI error: " + t);
   }
   const data = await resp.json();
-  const content = data.choices?.[0]?.message?.content ?? "";
-  // Alguns modelos retornam o JSON dentro de blocos de code fence; vamos limpar:
-  const cleaned = content.replace(/^```(json)?/i, "").replace(/```$/,"").trim();
-
-  let json;
-  try{
-    json = JSON.parse(cleaned);
-  }catch(e){
-    // tentativa extra: achar trecho JSON
-    const start = cleaned.indexOf("{");
-    const end = cleaned.lastIndexOf("}");
-    if(start>=0 && end>start){
-      json = JSON.parse(cleaned.slice(start, end+1));
-    }else{
-      throw new Error("Resposta não JSON");
-    }
-  }
-  return json;
+  return data.choices?.[0]?.message?.content || "Não foi possível gerar o plano agora.";
 }
 
-function renderPlan(plan){
-  // Resumo
-  if(plan.weekSummary){
-    const sum = document.createElement("div");
-    sum.className = "card";
-    sum.innerHTML = `<h4>Resumo da semana</h4><p>${escapeHtml(plan.weekSummary)}</p>`;
-    cardsEl.appendChild(sum);
-  }
-  // Dias
-  (plan.days||[]).forEach(d=>{
-    const el = document.createElement("div");
-    el.className = "card";
-    el.innerHTML = `<h4>${escapeHtml(d.day||"Dia")}</h4>`;
-    (d.blocks||[]).forEach(b=>{
-      const blk = document.createElement("div");
-      blk.className = "block";
-      blk.innerHTML = `<b>${escapeHtml(b.subject||"-")}</b> — ${Number(b.minutes)||0} min<br/>
-      <small>${escapeHtml(b.activity||"")}${b.notes? " • "+escapeHtml(b.notes):""}</small>`;
-      el.appendChild(blk);
-    });
-    cardsEl.appendChild(el);
-  });
-  // Dicas
-  if(plan.tips && plan.tips.length){
-    const tips = document.createElement("div");
-    tips.className = "card";
-    tips.innerHTML = "<h4>Dicas</h4>"+plan.tips.map(t=>`<div class="block"><small>${escapeHtml(t)}</small></div>`).join("");
-    cardsEl.appendChild(tips);
-  }
+function renderRichText(text){
+  const card = document.createElement("div");
+  card.className = "card";
+  const block = document.createElement("div");
+  block.className = "block";
+  const pre = document.createElement("pre");
+  pre.style.whiteSpace = "pre-wrap";
+  pre.style.margin = "0";
+  pre.textContent = text;
+  block.appendChild(pre);
+  card.appendChild(block);
+  cardsEl.appendChild(card);
 }
 
 function renderFallback({subjects, hours, goal}){
@@ -133,7 +116,7 @@ function renderFallback({subjects, hours, goal}){
   el.className = "card";
   el.innerHTML = `<h4>Plano básico</h4>
     <div class="block"><b>Priorize</b> — 40% do tempo nas matérias mais difíceis</div>
-    <div class="block"><b>Rotina</b> — ${hours}h/dia divididas em blocos de 45–50min</div>
+    <div class="block"><b>Rotina</b> — ${hours}h/dia em blocos de 45–50min com 10min de pausa</div>
     <div class="block"><b>Objetivo</b> — ${escapeHtml(goal)}</div>
     <div class="block"><small>Matérias: ${escapeHtml(subjects)}</small></div>`;
   cardsEl.appendChild(el);
