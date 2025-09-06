@@ -7,7 +7,7 @@ Bem-vindo ao **StudyAI**, um site que ajuda estudantes a criar **planos de estud
 ---
 
 ## 🚀 Como usar
-1. Acesse a página: **[https://dioguinho-max.github.io/Organizador-de-estudo/]**
+1. Acesse a página: **https://dioguinho-max.github.io/Organizador-de-estudo/**
 2. Preencha:
    - **Matérias** (separadas por vírgula)
    - **Tempo disponível por dia** (em horas)
